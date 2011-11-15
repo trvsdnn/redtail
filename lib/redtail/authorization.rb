@@ -1,5 +1,5 @@
 module Redtail
-  class Authentication
+  class Authorization
     
     # The message to be sent
     attr_reader :message
@@ -7,9 +7,9 @@ module Redtail
     # The timestamp for when the message was generated
     attr_reader :timestamp
     
-    def initialize(timestamp, message)
-      @timestamp = timestamp
+    def initialize(message, timestamp)
       @message   = message
+      @timestamp = timestamp.to_f.to_s[0..11]
     end
     
     # Generate HMAC hexdigest signature for sentry
@@ -19,14 +19,12 @@ module Redtail
       OpenSSL::HMAC.hexdigest('sha1', Redtail.config.sentry_key, "#{@timestamp} #{@message}")
     end
     
-    # A string representing the client version, used in the
-    # Authorization headers
+    # Generate the Authorization header for the HTTP post
     #
-    # @return [String] the version
-    def version
-      "Redtail v#{Redtail::VERSION}"
+    # @return [String] the HTTP Auth header
+    def header
+      "Sentry sentry_signature=#{signature}, sentry_timestamp=#{@timestamp}, redtail=#{VERSION}"
     end
-    
     
   end
 end

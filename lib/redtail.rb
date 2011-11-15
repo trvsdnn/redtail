@@ -1,16 +1,22 @@
 require 'net/http'
 require 'net/https'
 require 'openssl'
+require 'base64'
 require 'rubygems'
+require 'json'
+require 'uuid'
 
 require 'redtail/version'
 require 'redtail/configuration'
-require 'redtail/authentication'
+require 'redtail/forwarder'
+require 'redtail/authorization'
 require 'redtail/payload'
 
 module Redtail
   
   class << self
+    
+    attr_accessor :forwarder
     
     attr_writer :config
     
@@ -23,6 +29,7 @@ module Redtail
     #   end
     def configure(silent = false)
       yield(config)
+      self.forwarder = Forwarder.new(config)
     end
 
     # The configuration object
@@ -30,8 +37,9 @@ module Redtail
       @config ||= Configuration.new
     end
     
-    def log_to_sentry
-      
+    def log_to_sentry(exception, opts={})
+      payload = Payload.new(exception, opts)
+      forwarder.forward(payload.encode)
     end
     
   end

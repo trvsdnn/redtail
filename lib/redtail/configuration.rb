@@ -29,7 +29,7 @@ module Redtail
   
     def initialize
       @host              = 'localhost'
-      @store_uri         = '/store'
+      @store_uri         = '/store/'
       @secure            = false
       @http_open_timeout = 2
       @http_read_timeout = 5
